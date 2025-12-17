@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZenStream - Estabilidade Total</title>
+    <style>
+        :root {
+            --bg-dark: #0f0f0f;
+            --bg-sidebar: #0f0f0f;
+            --text-main: #fff;
+            --text-sec: #aaa;
+            --accent: #00e676; /* Verde "Zen/Safe" */
+            --skeleton-base: #2a2a2a;
+            --skeleton-highlight: #3a3a3a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        
+        body { background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden; }
+
+        /* Topbar & Layout igual, mas com a marca ZenStream */
+        .topbar {
+            height: 56px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; position: fixed; top: 0; width: 100%;
+            background: var(--bg-dark); z-index: 100; border-bottom: 1px solid #333;
+        }
+        .logo { font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; gap: 5px; color: var(--accent); }
+        .logo span { background: var(--accent); padding: 0 5px; border-radius: 4px; color: #000; }
+        .search-bar { background: #121212; border: 1px solid #303030; padding: 8px; width: 40%; border-radius: 20px; text-align: center; color: #555; }
+
+        .container { display: flex; margin-top: 56px; height: calc(100vh - 56px); }
+
+        .sidebar { width: 240px; background: var(--bg-sidebar); padding: 12px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+        .menu-item { padding: 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 15px; }
+        .menu-item:hover { background: #272727; }
+        .icon-box { width: 24px; height: 24px; background: #555; border-radius: 50%; }
+
+        .content { flex-grow: 1; padding: 24px; overflow-y: auto; }
+        .chips { display: flex; gap: 10px; margin-bottom: 20px; }
+        .chip { background: #272727; padding: 5px 12px; border-radius: 8px; font-size: 0.9rem; border: 1px solid #3f3f3f; cursor: pointer;}
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Mantivemos 2 colunas para comparação justa */
+            gap: 20px; row-gap: 40px;
+        }
+
+        /* --- SKELETON ANIMATION --- */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            color: #555; font-size: 0.8rem; font-weight: bold; text-transform: uppercase;
+        }
+
+        /* --- SOLUÇÃO 1: CONTAINER VERTICAL RÍGIDO --- */
+        .safe-vertical-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        /* O SEGREDO: Altura fixa reservada! */
+        .ad-slot-vertical {
+            height: 100px; 
+            width: 100%;
+            background: #1a1a1a;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- SOLUÇÃO 2: CONTAINER HORIZONTAL RÍGIDO --- */
+        .safe-horizontal-wrapper {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            height: 100%; /* Garante altura total */
+        }
+
+        /* O SEGREDO: Largura fixa reservada! */
+        .ad-slot-horizontal {
+            width: 140px;
+            min-height: 100%; /* Acompanha altura do video */
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        /* O CONTEÚDO DO AD (Carregado depois) */
+        .ad-content {
+            width: 100%; height: 100%;
+            background: #00e676; /* Verde agradável */
+            color: #003300;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+            opacity: 0; /* Começa invisível */
+            transition: opacity 0.5s ease; /* Fade in suave */
+            position: absolute; top: 0; left: 0;
+            padding: 10px; font-weight: bold;
+        }
+        
+        .ad-content.loaded { opacity: 1; }
+
+        /* Estilo do Vídeo (Inalterado) */
+        .video-card { width: 100%; flex-grow: 1; cursor: pointer;}
+        .thumbnail { width: 100%; aspect-ratio: 16/9; background: #333; border-radius: 12px; overflow: hidden; }
+        .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .video-info { display: flex; gap: 12px; margin-top: 12px; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: #555; flex-shrink: 0;}
+        .meta h3 { font-size: 1rem; margin-bottom: 4px; }
+        .meta p { font-size: 0.85rem; color: var(--text-sec); }
+
+    </style>
+</head>
+<body>
+
+    <nav class="topbar">
+        <div class="logo">Zen<span>Stream</span></div>
+        <div class="search-bar">Pesquisar com Paz...</div>
+        <div class="icon-box" style="background: var(--accent); color: #000; display:grid; place-items:center;">Z</div>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="menu-item active"><div class="icon-box"></div>Home</div>
+            <div class="menu-item"><div class="icon-box"></div>Trending</div>
+        </aside>
+
+        <main class="content">
+            <div class="chips">
+                <div class="chip" style="background: #fff; color: #000;">Tudo</div>
+                <div class="chip">UX Design</div>
+                <div class="chip">Performance</div>
+            </div>
+
+            <div class="video-grid">
+
+                <div class="safe-vertical-wrapper js-safe-load">
+                    <div class="ad-slot-vertical">
+                        <div class="skeleton">Carregando Patrocinador...</div>
+                        <div class="ad-content">
+                            <span>CLOUD HOSTING</span>
+                            <small>Rápido e Seguro</small>
+                        </div>
+                    </div>
+                    
+                    <div class="video-card">
+                        <div class="thumbnail"><img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&q=80" alt="Code"></div>
+                        <div class="video-info">
+                            <div class="avatar"></div>
+                            <div class="meta"><h3>Core Web Vitals: CLS Explicado</h3><p>Google Search Central • 2M views</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="safe-horizontal-wrapper js-safe-load">
+                    <div class="ad-slot-horizontal">
+                        <div class="skeleton">ADS</div>
+                        <div class="ad-content" style="writing-mode: vertical-rl; text-orientation: mixed;">
+                            MONITOR 4K ULTRA
+                        </div>
+                    </div>
+
+                    <div class="video-card">
+                        <div class="thumbnail"><img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=600&q=80" alt="Code"></div>
+                        <div class="video-info">
+                            <div class="avatar"></div>
+                            <div class="meta"><h3>Como programar sem stress</h3><p>Dev Zen • 500k views</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="safe-vertical-wrapper js-safe-load">
+                    <div class="ad-slot-vertical">
+                        <div class="skeleton">Espaço Reservado</div>
+                        <div class="ad-content">IDEAL KEYBOARD</div>
+                    </div>
+                    <div class="video-card">
+                        <div class="thumbnail"><img src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=600&q=80" alt="Code"></div>
+                        <div class="video-info">
+                            <div class="avatar"></div>
+                            <div class="meta"><h3>CSS Grid vs Flexbox</h3><p>FrontEnd Tips • 300k views</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="safe-horizontal-wrapper js-safe-load">
+                    <div class="ad-slot-horizontal">
+                        <div class="skeleton">...</div>
+                        <div class="ad-content" style="writing-mode: vertical-rl;">VPN SEGURA</div>
+                    </div>
+                    <div class="video-card">
+                        <div class="thumbnail"><img src="https://images.unsplash.com/photo-1523474253046-8cd2748b5fd2?w=600&q=80" alt="Code"></div>
+                        <div class="video-info">
+                            <div class="avatar"></div>
+                            <div class="meta"><h3>Segurança em APIs</h3><p>BackEnd Pro • 100k views</p></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // LÓGICA DO BEM (Simula carregamento de rede sem layout shift)
+        
+        const safeItems = document.querySelectorAll('.js-safe-load');
+
+        safeItems.forEach(item => {
+            const adContent = item.querySelector('.ad-content');
+            const skeleton = item.querySelector('.skeleton');
+            let loaded = false;
+
+            // Vamos usar o mesmo trigger (mouseenter) para ser fácil de comparar no vídeo
+            // Mas note que a estrutura HTML já reservou o espaço!
+            
+            item.addEventListener('mouseenter', () => {
+                if (loaded) return;
+
+                // Simula delay de rede (loading assíncrono)
+                setTimeout(() => {
+                    // Apenas faz o fade-in do conteúdo
+                    // O esqueleto fica por trás (ou pode ser removido), mas o container não muda de tamanho
+                    adContent.classList.add('loaded');
+                    skeleton.style.opacity = '0'; // Esconde skeleton
+                    loaded = true;
+                }, 400); // 400ms para dar tempo de ver o skeleton
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdTube - Onde o Anúncio é Rei</title>
+    <style>
+        :root {
+            --bg-dark: #0f0f0f;
+            --bg-sidebar: #0f0f0f;
+            --text-main: #fff;
+            --text-sec: #aaa;
+            --accent: #3ea6ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        
+        body { background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden; }
+
+        /* --- Topbar --- */
+        .topbar {
+            height: 56px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; position: fixed; top: 0; width: 100%;
+            background: var(--bg-dark); z-index: 100; border-bottom: 1px solid #333;
+        }
+        .logo { font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; gap: 5px; }
+        .logo span { background: #f00; padding: 0 5px; border-radius: 4px; color: white; }
+        .search-bar { background: #121212; border: 1px solid #303030; padding: 8px; width: 40%; border-radius: 20px; text-align: center; color: #555; }
+
+        /* --- Layout --- */
+        .container { display: flex; margin-top: 56px; height: calc(100vh - 56px); }
+
+        .sidebar {
+            width: 240px; background: var(--bg-sidebar); padding: 12px;
+            display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
+        }
+        .menu-item { padding: 10px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 15px; }
+        .menu-item:hover { background: #272727; }
+        .icon-box { width: 24px; height: 24px; background: #555; border-radius: 50%; }
+
+        .content { flex-grow: 1; padding: 24px; overflow-y: auto; }
+
+        .chips { display: flex; gap: 10px; margin-bottom: 20px; }
+        .chip { background: #272727; padding: 5px 12px; border-radius: 8px; font-size: 0.9rem; border: 1px solid #3f3f3f; cursor: pointer;}
+
+        /* --- O GRID MÁGICO DE 2 COLUNAS --- */
+        .video-grid {
+            display: grid;
+            /* Força 2 colunas para garantir a piada Esquerda/Direita */
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px;
+            row-gap: 40px;
+        }
+
+        /* Estilo Base do Card */
+        .video-card { cursor: pointer; width: 100%; }
+        .thumbnail {
+            width: 100%; aspect-ratio: 16/9; background: #333;
+            border-radius: 12px; overflow: hidden; position: relative;
+        }
+        .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .video-info { display: flex; gap: 12px; margin-top: 12px; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: #555; flex-shrink: 0;}
+        .meta h3 { font-size: 1rem; margin-bottom: 4px; line-height: 1.2; }
+        .meta p { font-size: 0.85rem; color: var(--text-sec); }
+
+
+        /* --- CSS DO CAOS (ARMADILHAS) --- */
+
+        /* TIPO 1: Armadilha Vertical (Coluna da Esquerda) */
+        .trap-vertical-wrapper {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .evil-ad-vertical {
+            height: 0;
+            background: #ff4444;
+            overflow: hidden;
+            transition: height 0.1s ease-out; /* BUMP rápido */
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+        
+        .evil-ad-vertical.active {
+            height: 100px; /* Tamanho do empurrão */
+            margin-bottom: 10px;
+            border: 2px solid yellow;
+        }
+
+
+        /* TIPO 2: Armadilha Horizontal (Coluna da Direita) */
+        .trap-horizontal-wrapper {
+            display: flex;
+            flex-direction: row; /* Coloca Ad ao lado do Card */
+            align-items: stretch; /* Garante que tenham a mesma altura */
+            overflow: hidden; /* Evita quebras estranhas */
+        }
+
+        .evil-ad-horizontal {
+            width: 0;
+            background: #4caf50; /* Verde Dinheiro */
+            overflow: hidden;
+            transition: width 0.1s ease-out;
+            display: flex; align-items: center; justify-content: center;
+            color: black; font-weight: bold;
+            writing-mode: vertical-rl; text-orientation: mixed;
+            flex-shrink: 0; /* Impede o ad de ser esmagado */
+            border-radius: 12px 0 0 12px;
+        }
+
+        .evil-ad-horizontal.active {
+            width: 120px; /* Largura do empurrão */
+            margin-right: 5px;
+            border: 2px dashed #fff;
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav class="topbar">
+        <div class="logo">Ad<span>Tube</span></div>
+        <div class="search-bar">Pesquisar...</div>
+        <div class="icon-box" style="background: #3ea6ff; color: #000; display:grid; place-items:center;">U</div>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="menu-item" style="background: #272727;"><div class="icon-box"></div>Início</div>
+            <div class="menu-item"><div class="icon-box"></div>Em Alta</div>
+            <div class="menu-item"><div class="icon-box"></div>Inscrições</div>
+        </aside>
+
+        <main class="content">
+            <div class="chips">
+                <div class="chip" style="background: #fff; color: #000;">Tudo</div>
+                <div class="chip">Dev</div>
+                <div class="chip">Design</div>
+                <div class="chip">Marketing</div>
+            </div>
+
+            <div class="video-grid">
+
+                <div class="trap-vertical-wrapper js-trap-vertical">
+                    <div class="evil-ad-vertical">CLIQUE AQUI!</div> <div class="video-card">
+                        <div class="thumbnail"><img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&q=80" alt="Code"></div>
+                        <div class="video-info">
+                            <div class="avatar"></div>
+                            <div class="meta"><h3>Evitando Layout Shift (CLS)</h3><p>Dev Sênior • 1M views</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trap-horizontal-wrapper js-trap-horizontal">
+                    <div class="evil-ad-horizontal">GANHE RÁPIDO</div> <div class="video-card">
+                        <div class="thumbnail"><img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=600&q=80" alt="Money"></div>
+                        <div class="video-info">
+                            <div class="avatar"></div>
+                            <div class="meta"><h3>Como ficar rico com Ads</h3><p>Guru do Mkt • 500k views</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trap-vertical-wrapper js-trap-vertical">
+                    <div class="evil-ad-vertical">PROMOÇÃO 90%</div>
+                    <div class="video-card">
+                        <div class="thumbnail"><img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&q=80" alt="Tech"></div>
+                        <div class="video-info">
+                            <div class="avatar"></div>
+                            <div class="meta"><h3>Review: Macbook M3</h3><p>Tech Lovers • 200k views</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trap-horizontal-wrapper js-trap-horizontal">
+                    <div class="evil-ad-horizontal">ASSINE AGORA</div>
+                    <div class="video-card">
+                        <div class="thumbnail"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80" alt="Data"></div>
+                        <div class="video-info">
+                            <div class="avatar"></div>
+                            <div class="meta"><h3>Análise de Dados 2025</h3><p>Data Science • 150k views</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trap-vertical-wrapper js-trap-vertical">
+                    <div class="evil-ad-vertical">VÍRUS DETECTADO</div>
+                    <div class="video-card">
+                        <div class="thumbnail"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80" alt="Sec"></div>
+                        <div class="video-info">
+                            <div class="avatar"></div>
+                            <div class="meta"><h3>Curso de Pentest Grátis</h3><p>Hacker Ético • 50k views</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trap-horizontal-wrapper js-trap-horizontal">
+                    <div class="evil-ad-horizontal">NAMORO ONLINE</div>
+                    <div class="video-card">
+                        <div class="thumbnail"><img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80" alt="Social"></div>
+                        <div class="video-info">
+                            <div class="avatar"></div>
+                            <div class="meta"><h3>Engenharia Social</h3><p>Security Plus • 900k views</p></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // SCRIPT GENÉRICO - Funciona para todos os itens da lista
+
+        // 1. Lógica para Coluna Esquerda (Vertical Shift)
+        const verticalTraps = document.querySelectorAll('.js-trap-vertical');
+
+        verticalTraps.forEach(trap => {
+            const ad = trap.querySelector('.evil-ad-vertical');
+            const video = trap.querySelector('.video-card');
+            let triggered = false;
+
+            // Ao entrar no vídeo, o banner cai de cima
+            video.addEventListener('mouseenter', () => {
+                if(triggered) return;
+                setTimeout(() => {
+                    ad.classList.add('active');
+                    triggered = true;
+                }, 100); // 100ms de delay (tempo de reação humana)
+            });
+
+            ad.addEventListener('click', () => {
+                alert("SHIFT VERTICAL: Você tentou clicar no vídeo, mas o banner empurrou o conteúdo para baixo!");
+            });
+        });
+
+        // 2. Lógica para Coluna Direita (Horizontal Shift)
+        const horizontalTraps = document.querySelectorAll('.js-trap-horizontal');
+
+        horizontalTraps.forEach(trap => {
+            const ad = trap.querySelector('.evil-ad-horizontal');
+            const video = trap.querySelector('.video-card');
+            let triggered = false;
+
+            // Ao entrar no vídeo, o banner empurra da esquerda para a direita
+            video.addEventListener('mouseenter', () => {
+                if(triggered) return;
+                setTimeout(() => {
+                    ad.classList.add('active');
+                    triggered = true;
+                }, 50); // Quase instantâneo para ser irritante
+            });
+
+            ad.addEventListener('click', () => {
+                alert("SHIFT HORIZONTAL: O conteúdo fugiu para o lado e você clicou no banner lateral!");
+            });
+        });
+
+    </script>
+</body>
+</html>
